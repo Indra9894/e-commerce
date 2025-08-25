@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Product Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🛒 Admin Product Dashboard</h1>
+  </header>
+
+  <main>
+    <section class="add-product-form">
+      <h2>Add New Product</h2>
+      <input type="text" id="name" placeholder="Product Name" required>
+      <input type="number" id="price" placeholder="Price" required>
+      <input type="text" id="color" placeholder="Color" required>
+      <button onclick="addProduct()">Add Product</button>
+    </section>
+
+    <section>
+      <h2>All Products</h2>
+      <div id="product-list" class="product-list"></div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = '/api/products';
+
+    async function loadProducts() {
+      const res = await fetch(API_URL);
+      const products = await res.json();
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+      products.forEach(product => {
+        const item = document.createElement('div');
+        item.className = 'product-item';
+        item.innerHTML = `
+          <h3 onclick="viewProduct(${product.id})">${product.name}</h3>
+          <p>Price: $${product.price}</p>
+          <p>Color: ${product.color}</p>
+          <p>Likes: ${product.likes || 0}</p>
+          <button onclick="editProduct(${product.id})">Edit</button>
+          <button onclick="deleteProduct(${product.id})">Delete</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    async function addProduct() {
+      const name = document.getElementById('name').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const color = document.getElementById('color').value;
+
+      if (!name || !price || !color) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, price, color })
+      });
+
+      if (res.ok) {
+        document.getElementById('name').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('color').value = '';
+        loadProducts();
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm("Are you sure to delete this product?")) return;
+
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+      });
+
+      loadProducts();
+    }
+
+    function editProduct(id) {
+      const newName = prompt("Enter new name:");
+      const newPrice = prompt("Enter new price:");
+      const newColor = prompt("Enter new color:");
+
+      if (!newName || !newPrice || !newColor) {
+        alert("All fields required.");
+        return;
+      }
+
+      fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name: newName, price: parseFloat(newPrice), color: newColor })
+      }).then(() => loadProducts());
+    }
+
+    function viewProduct(id) {
+      window.location.href = `product.html?id=${id}`;
+    }
+
+    window.onload = loadProducts;
+  </script>
+</body>
+</html>

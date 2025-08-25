@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Details</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🛍️ Product Details</h1>
+  </header>
+
+  <main>
+    <div id="product-details"></div>
+    <button onclick="buyNow()">Buy Now</button>
+    <button onclick="addToCart()">Add to Cart</button>
+  </main>
+
+  <script>
+    const API_URL = '/api/products';
+
+    function getProductIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("id");
+    }
+
+    async function loadProduct() {
+      const id = getProductIdFromUrl();
+      const res = await fetch(`${API_URL}/${id}`);
+      const product = await res.json();
+      const container = document.getElementById("product-details");
+
+      container.innerHTML = `
+        <h2>${product.name}</h2>
+        <p>Price: $${product.price}</p>
+        <p>Color: ${product.color}</p>
+        <p>Likes: ${product.likes}</p>
+      `;
+    }
+
+    function buyNow() {
+      alert("This would redirect to payment gateway (simulation).");
+    }
+
+    function addToCart() {
+      alert("Product added to cart (simulation).");
+    }
+
+    window.onload = loadProduct;
+  </script>
+</body>
+</html>
