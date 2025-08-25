@@ -11,14 +11,14 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: "${env.REPO_URL}"
+                git branch: 'main', url: "${REPO_URL}"
             }
         }
 
         stage('Build Backend Docker Image') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t $BACKEND_IMAGE .'
+                    sh "docker build -t ${BACKEND_IMAGE} ."
                 }
             }
         }
@@ -26,21 +26,20 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t $FRONTEND_IMAGE .'
+                    sh "docker build -t ${FRONTEND_IMAGE} ."
                 }
             }
         }
 
         stage('Run Docker Compose') {
             steps {
-                sh "docker-compose -f ${env.DOCKER_COMPOSE_FILE} down"    // Stop old containers first
-                sh "docker-compose -f ${env.DOCKER_COMPOSE_FILE} up -d --build"  // Start fresh containers
+                sh "docker-compose -f ${DOCKER_COMPOSE_FILE} down"
+                sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d --build"
             }
         }
 
         stage('Clean Up') {
             steps {
-                // Optionally prune dangling images or stopped containers
                 sh "docker system prune -f"
             }
         }
@@ -55,3 +54,4 @@ pipeline {
         }
     }
 }
+
